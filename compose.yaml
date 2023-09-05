@@ -1,0 +1,29 @@
+services:
+  api:
+    image: eclipse-temurin:17
+    ports:
+      - "5555:5555"
+    tty: true
+    volumes:
+      - ./api:/workspace:cached
+    depends_on:
+      - db
+  front:
+    build: ./front
+    ports:
+      - "5173:5173"
+    tty: true
+    volumes:
+      - ./front:/workspace:cached
+  db:
+    image: postgres:14.2
+    environment:
+      POSTGRES_DB: db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+volumes:
+  db-data:
