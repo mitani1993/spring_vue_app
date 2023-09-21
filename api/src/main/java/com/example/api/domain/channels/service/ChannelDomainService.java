@@ -28,4 +28,9 @@ public class ChannelDomainService {
         return channelRepository.findAll();
     }
 
+     public Channel update(Channel channle){
+        // TODO: Repository作成時に修正する。
+        return channle;
+    }
+
 }

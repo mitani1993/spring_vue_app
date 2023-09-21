@@ -37,7 +37,6 @@ public class ChannelController {
     @PutMapping("/{id}")
     public Channel updade(@PathVariable("id") int id, @RequestBody Channel channel){
         channel.setId(id);
-        // TODO: Service作成後に修正する。
-        return channel;
+        return channelService.updade(channel);
     }
 }
