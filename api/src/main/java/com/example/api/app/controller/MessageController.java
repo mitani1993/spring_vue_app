@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.api.app.service.MessageService;
 import com.example.api.domain.messages.model.Message;
 
 import lombok.RequiredArgsConstructor;
@@ -16,10 +17,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @CrossOrigin
 public class MessageController {
+
+    private final MessageService messageService;
+
     @PostMapping
     public Message post(@PathVariable int channelId, @RequestBody Message message) {
         message.setChannelId(channelId);
-        // TODO: Service作成後に修正する。
-        return message;
+        return messageService.post(message);
     }
 }
