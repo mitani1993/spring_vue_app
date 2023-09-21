@@ -14,20 +14,20 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ChannelDomainService {
 
+    private final ChannelRepository channelRepository;
+
     public Channel create(Channel channel){
-        // TODO: ユーザからは登録用のIDを受け取らない仕様のため、DB内にあるIDの最大値+1を新しいチャンネルのIDとする。
-        Optional<Integer> currentMaxId = Optional.of(1);
-
+        var currentMaxId = channelRepository.getMaxId();
         var newid = currentMaxId.orElse(0) + 1;
-        channel.setId(newid);
 
-        // TODO: DBに永続化する。
+        channel.setId(newid);
+        channelRepository.insert(channel);
 
         return channel;
     }
 
     public List<Channel> findAll(){
-        return Collections.emptyList();
+        return channelRepository.findAll();
     }
 
 }
