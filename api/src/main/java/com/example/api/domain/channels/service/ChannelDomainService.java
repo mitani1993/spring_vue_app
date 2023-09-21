@@ -29,7 +29,7 @@ public class ChannelDomainService {
     }
 
      public Channel update(Channel channle){
-        // TODO: Repository作成時に修正する。
+        channelRepository.update(channle);
         return channle;
     }
 
