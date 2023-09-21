@@ -20,6 +20,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 public class ChannelApiTest {
@@ -111,21 +114,64 @@ public class ChannelApiTest {
         Assertion.assertEquals(expectedChannelsTable, actualChannelsTable);
     }
 
-    private static Stream<Arguments> findAllTestProvider() {
-        return Stream.of(
-                Arguments.arguments("[]", "no-record"),
-                Arguments.arguments(
-                        """
-                                  [
-                                    {
-                                      "id": 1,
-                                      "name": "はじめてのチャンネル"
-                                    },
-                                    {
-                                      "id": 2,
-                                      "name": "2つ目のチャンネル"
-                                    }
-                                  ]
-                                """, "multi-record"));
-    }
+  private static Stream<Arguments> findAllTestProvider() {
+    return Stream.of(
+        Arguments.arguments("[]", "no-record"),
+        Arguments.arguments(
+            """
+              [
+                {
+                  "id": 1,
+                  "name": "はじめてのチャンネル"
+                },
+                {
+                  "id": 2,
+                  "name": "2つ目のチャンネル"
+                }
+              ]
+            """, "multi-record"));
+  }
+
+  @ParameterizedTest
+  @MethodSource("updateTestProvider")
+  public void updateTest(int id, String requestBody, String dbPath) throws Exception {
+    IDatabaseTester databaseTester = new DataSourceDatabaseTester(dataSource);
+    var givenUrl = this.getClass().getResource("/channels/update/" + dbPath + "/given/");
+    databaseTester.setDataSet(new CsvURLDataSet(givenUrl));
+    databaseTester.onSetup();
+
+    var expectedBodyMapper = new ObjectMapper();
+    var expectedNode = expectedBodyMapper.readTree(requestBody);
+    ((ObjectNode) expectedNode).put("id", 1);
+    var expectedBody = expectedNode.toString();
+
+    mockMvc.perform(
+        MockMvcRequestBuilders.put("/channels/" + id)
+            .content(requestBody)
+            .contentType(MediaType.APPLICATION_JSON))
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect((result) -> JSONAssert.assertEquals(
+            expectedBody,
+            result.getResponse().getContentAsString(),
+            false));
+
+    var actualDataSet = databaseTester.getConnection().createDataSet();
+    var actualChannelsTable = actualDataSet.getTable("channels");
+    var expectedUri = this.getClass().getResource("/channels/update/" + dbPath + "/expected/");
+    var expectedDataSet = new CsvURLDataSet(expectedUri);
+    var expectedChannelsTable = expectedDataSet.getTable("channels");
+    Assertion.assertEquals(expectedChannelsTable, actualChannelsTable);
+  }
+
+  private static Stream<Arguments> updateTestProvider() {
+    return Stream.of(
+        Arguments.arguments(
+            1,
+            """
+                {
+                  "name": "更新後のチャンネル"
+                }
+                """,
+            "success"));
+  }
 }

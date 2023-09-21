@@ -1,8 +1,6 @@
 package com.example.api.domain.channels.service;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
