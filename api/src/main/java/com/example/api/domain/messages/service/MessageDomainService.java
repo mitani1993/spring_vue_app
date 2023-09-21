@@ -15,13 +15,14 @@ import lombok.RequiredArgsConstructor;
 public class MessageDomainService {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddhhmm");
+    private final MessageRepository messageRepository;
 
     public Message post(Message message) {
         var uuid = UUID.randomUUID();
         var now = LocalDateTime.now();
         message.setId(now.format(FORMATTER) + "-" + uuid.toString());
         message.setTimestamp(now);
-        // TODO: Repository作成後にDBに保存する処理を追加する。
+        messageRepository.insert(message);
         return message;
     }
 }
