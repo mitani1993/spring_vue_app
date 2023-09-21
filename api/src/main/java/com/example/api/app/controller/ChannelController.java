@@ -1,4 +1,4 @@
-package com.example.api.controller;
+package com.example.api.app.controller;
 
 import java.util.Collections;
 import java.util.List;
