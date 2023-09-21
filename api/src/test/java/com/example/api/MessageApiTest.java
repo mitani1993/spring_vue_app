@@ -1,6 +1,9 @@
 package com.example.api;
 
+import java.util.Optional;
 import java.util.stream.Stream;
+
+import javax.sql.DataSource;
 
 import org.dbunit.Assertion;
 import org.dbunit.DataSourceDatabaseTester;
@@ -23,8 +26,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
-import jakarta.activation.DataSource;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -104,6 +107,140 @@ public class MessageApiTest {
                     }
                         """,
                 "success"));
+    }
+
+  @ParameterizedTest
+  @MethodSource("findTestProvider")
+  public void findTest(int channelId, Optional<String> searchWord, String expectedBody, String dbPath)
+      throws Exception {
+        IDatabaseTester databaseTester = new DataSourceDatabaseTester(dataSource);
+        var givenUrl = this.getClass().getResource("/messages/find/" + dbPath + "/given/");
+        databaseTester.setDataSet(new CsvURLDataSet(givenUrl));
+        databaseTester.onSetup();
+
+        // クエリストリングの作成
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<String, String>();
+        // 検索条件のメッセージ本文があればクエリストリングに追加
+        searchWord.ifPresent(w -> params.add("searchWord", w));
+
+        mockMvc.perform(
+            MockMvcRequestBuilders.get("/channels/" + channelId + "/messages") // getメソッドを利用
+                .params(params)) // クエリストリングをセット
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect((result) -> JSONAssert.assertEquals(
+                expectedBody,
+                result.getResponse().getContentAsString(),
+                false));
+
+        var actualDataSet = databaseTester.getConnection().createDataSet();
+        var actualMessagesTable = actualDataSet.getTable("messages");
+
+        // 事前に用意したデータから変わっていないことを検証する
+        var expectedUri = this.getClass().getResource("/messages/find/" + dbPath + "/given/");
+        var expectedDataSet = new CsvURLDataSet(expectedUri);
+        var expectedMessagesTable = expectedDataSet.getTable("messages");
+
+        Assertion.assertEquals(expectedMessagesTable, actualMessagesTable);
+    }
+
+    private static Stream<Arguments> findTestProvider() {
+        return Stream.of(
+            Arguments.arguments(
+                // DBに存在しないチャンネルID
+                3,
+                // メッセージ本文の検索条件なし
+                Optional.empty(),
+                // 検索結果なし
+                "[]",
+                // DBのディレクトリ
+                "base"),
+            Arguments.arguments(
+                // DBに存在するチャンネルID
+                1,
+                // メッセージ本文の検索条件なし
+                Optional.empty(),
+                // 検索結果なし
+                """
+                    [
+                    {
+                        "id": "202210151200-8097c0d2-ddc7-f02a-9dbf-29dfcd646d2b",
+                        "channelId": 1,
+                        "text": "今日のランチは焼き鳥",
+                        "username": "ユーザー",
+                        "timestamp": "2022-10-15T12:00:00"
+                    },
+                    {
+                        "id": "202210151201-9f207c7a-16f5-80a0-a81f-5b216b9da38f",
+                        "channelId": 1,
+                        "text": "明日のランチは唐揚げ",
+                        "username": "ユーザー",
+                        "timestamp": "2022-10-15T12:01:00"
+                    },
+                    {
+                        "id": "202210151202-469ffa6c-fcbf-7d95-cc8a-e1a4ba9a5b66",
+                        "channelId": 1,
+                        "text": "明日のディナーはよだれ鶏",
+                        "username": "ユーザー",
+                        "timestamp": "2022-10-15T12:02:00"
+                    }
+                    ]
+                    """,
+                // DBのディレクトリ
+                "base"),
+            Arguments.arguments(
+                // DBに存在しないチャンネルID
+                3,
+                // DBに存在しないメッセージ文言
+                Optional.of("朝食"),
+                // 検索結果なし
+                "[]",
+                // DBのディレクトリ
+                "base"),
+            Arguments.arguments(
+                // DBに存在するチャンネルID
+                1,
+                // DBに存在しないメッセージ文言
+                Optional.of("朝食"),
+                // 検索結果なし
+                "[]",
+                // DBのディレクトリ
+                "base"),
+            Arguments.arguments(
+                // DBに存在しないチャンネルID
+                3,
+                // DBに存在するメッセージ文言
+                Optional.of("ランチ"),
+                // 検索結果なし
+                "[]",
+                // DBのディレクトリ
+                "base"),
+            Arguments.arguments(
+                // DBに存在するチャンネルID
+                1,
+                // DBのメッセージ本文に部分一致する文言
+                Optional.of("ランチ"),
+                // 条件に合致するメッセージ
+                """
+                [
+                    {
+                    "id": "202210151200-8097c0d2-ddc7-f02a-9dbf-29dfcd646d2b",
+                    "channelId": 1,
+                    "text": "今日のランチは焼き鳥",
+                    "username": "ユーザー",
+                    "timestamp": "2022-10-15T12:00:00"
+                    },
+                    {
+                    "id": "202210151201-9f207c7a-16f5-80a0-a81f-5b216b9da38f",
+                    "channelId": 1,
+                    "text": "明日のランチは唐揚げ",
+                    "username": "ユーザー",
+                    "timestamp": "2022-10-15T12:01:00"
+                    }
+                ]
+                    """,
+                // DBのディレクトリ
+                "base")
+                );
     }
 
 }
