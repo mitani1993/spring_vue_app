@@ -1,5 +1,9 @@
 package com.example.api.app.service;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,5 +24,9 @@ public class MessageService {
         var username = "guest";
         message.setUsername(username);
         return messageDomainService.post(message);
+    }
+
+    public List<Message> find(int channelId, Optional<String> searchWord){
+        return messageDomainService.find(channelId, searchWord);
     }
 }

@@ -2,6 +2,9 @@ package com.example.api.domain.messages.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -24,5 +27,9 @@ public class MessageDomainService {
         message.setTimestamp(now);
         messageRepository.insert(message);
         return message;
+    }
+    public List<Message> find(int channelId, Optional<String> searchWord) {
+        // TODO: DomainServiceにメソッド追加後に修正する。
+        return Collections.emptyList();
     }
 }

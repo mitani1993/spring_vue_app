@@ -36,7 +36,6 @@ public class MessageController {
     public List<Message> find(
         @PathVariable("channelId") int channelId,
         @RequestParam("searchWord") Optional<String> searchWord) {
-        // TODO: Service作成後に修正する。
-        return Collections.emptyList();
+        return messageService.find(channelId, searchWord);
     }
 }
