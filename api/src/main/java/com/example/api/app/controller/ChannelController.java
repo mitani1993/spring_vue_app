@@ -39,4 +39,8 @@ public class ChannelController {
         channel.setId(id);
         return channelService.updade(channel);
     }
+
+    public void delete(@PathVariable("id") int id){
+        // TODO: Service作成ごに修正する。
+    }
 }
