@@ -33,4 +33,7 @@ public class ChannelDomainService {
         return channle;
     }
 
+    public void delete(int id){
+        // TODO: Repository作成後に修正する。
+    }
 }

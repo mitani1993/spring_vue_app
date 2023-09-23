@@ -29,4 +29,8 @@ public class ChannelService {
     public Channel updade(Channel channel){
         return channelDomainService.update(channel);
     }
+
+    public void delete(int id){
+        channelDomainService.delete(id);
+    }
 }

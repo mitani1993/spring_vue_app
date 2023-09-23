@@ -41,6 +41,6 @@ public class ChannelController {
     }
 
     public void delete(@PathVariable("id") int id){
-        // TODO: Service作成ごに修正する。
+        channelService.delete(id);
     }
 }
