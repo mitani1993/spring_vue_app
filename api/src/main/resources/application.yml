@@ -1,9 +1,9 @@
 spring:
   datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:testdb;MODE=PostgreSQL
-    username: sa
-    password:
+    driver-class-name: org.postgresql.Driver
+    url: dbc:postgresql://db:5432/db
+    username: user
+    password: pass
 mybatis:
   mapper-locations: classpath*:mybatis/*.xml
   configuration:
