@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/channels/{channelId}/messages")
 @RequiredArgsConstructor
-@CrossOrigin
 public class MessageController {
 
     private final MessageService messageService;
@@ -33,8 +32,8 @@ public class MessageController {
 
     @GetMapping
     public List<Message> find(
-        @PathVariable("channelId") int channelId,
-        @RequestParam("searchWord") Optional<String> searchWord) {
+            @PathVariable("channelId") int channelId,
+            @RequestParam("searchWord") Optional<String> searchWord) {
         return messageService.find(channelId, searchWord);
     }
 }
